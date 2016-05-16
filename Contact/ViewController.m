@@ -63,9 +63,9 @@
         NSLog(@"Number of lines in the file:%ld",[lines count]);
         NSLog(@"lines is %@",lines);
         
-        for (NSString *line in lines) {
-            [self addContact:line];
-        }
+//        for (NSString *line in lines) {
+//            [self addContact:line];
+//        }
     }
 }
 

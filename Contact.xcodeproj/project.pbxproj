@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9F904C901CE9B66000F932CD /* contact.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9F904C8F1CE9B66000F932CD /* contact.txt */; };
+		9F0FE1341CEA23D5006BC1D9 /* contact.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9F0FE1331CEA23D5006BC1D9 /* contact.txt */; };
 		9FF8FD1B1CE869D00028B4B0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FF8FD1A1CE869D00028B4B0 /* main.m */; };
 		9FF8FD1E1CE869D00028B4B0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FF8FD1D1CE869D00028B4B0 /* AppDelegate.m */; };
 		9FF8FD211CE869D00028B4B0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FF8FD201CE869D00028B4B0 /* ViewController.m */; };
@@ -37,7 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		9F904C8F1CE9B66000F932CD /* contact.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = contact.txt; sourceTree = "<group>"; };
+		9F0FE1331CEA23D5006BC1D9 /* contact.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = contact.txt; sourceTree = "<group>"; };
 		9FF8FD161CE869CF0028B4B0 /* Contact.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Contact.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FF8FD1A1CE869D00028B4B0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9FF8FD1C1CE869D00028B4B0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -123,7 +123,7 @@
 		9FF8FD191CE869D00028B4B0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				9F904C8F1CE9B66000F932CD /* contact.txt */,
+				9F0FE1331CEA23D5006BC1D9 /* contact.txt */,
 				9FF8FD1A1CE869D00028B4B0 /* main.m */,
 			);
 			name = "Supporting Files";
@@ -214,6 +214,7 @@
 				TargetAttributes = {
 					9FF8FD151CE869CF0028B4B0 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = U5SN67824Y;
 					};
 					9FF8FD2E1CE869D10028B4B0 = {
 						CreatedOnToolsVersion = 7.3;
@@ -251,7 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9FF8FD291CE869D00028B4B0 /* LaunchScreen.storyboard in Resources */,
-				9F904C901CE9B66000F932CD /* contact.txt in Resources */,
+				9F0FE1341CEA23D5006BC1D9 /* contact.txt in Resources */,
 				9FF8FD261CE869D00028B4B0 /* Assets.xcassets in Resources */,
 				9FF8FD241CE869D00028B4B0 /* Main.storyboard in Resources */,
 			);
@@ -425,12 +426,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Contact/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.fengwujie.Contact;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -438,12 +441,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Contact/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.fengwujie.Contact;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
