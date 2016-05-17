@@ -11,10 +11,30 @@
 #import <AddressBookUI/AddressBookUI.h>
 
 @interface ViewController ()
-@property (weak, nonatomic) IBOutlet UITextField *txtName;
-@property (weak, nonatomic) IBOutlet UITextField *txtPhone;
+//历史数量值
+@property (weak, nonatomic) IBOutlet UILabel *historyCount;
+//批次导入数量值
+@property (weak, nonatomic) IBOutlet UITextField *importCount;
+//姓名默认为手机号
+@property (weak, nonatomic) IBOutlet UIButton *check1;
+//姓名随机生成
+@property (weak, nonatomic) IBOutlet UIButton *check2;
+@property (weak, nonatomic) IBOutlet UILabel *errorMsg;
 
+@property (assign, nonatomic) NSInteger iHistoryCount;
+@property (strong,nonatomic) NSArray *arrayPhone;
+@property (strong,nonatomic) NSArray *arrayContact;
+//清空通讯录
+- (IBAction)btnClearContact:(id)sender;
+//添加通讯录
 - (IBAction)btnAddContact:(id)sender;
+//清空历史
+- (IBAction)btnClearHistory:(id)sender;
+//姓名默认为手机号
+- (IBAction)btnCheck1:(id)sender;
+//姓名随机生成
+- (IBAction)btncheck2:(id)sender;
+
 @end
 
 @implementation ViewController
@@ -22,6 +42,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+    [self readNSUserDefaults];
     
     //1.获取授权状态
     ABAuthorizationStatus type =  ABAddressBookGetAuthorizationStatus();
@@ -45,31 +67,133 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)btnAddContact:(id)sender {
-    NSError *error;
-    NSString *textFileContents = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"contact" ofType:@"txt"] encoding:NSUTF8StringEncoding error: &error];
-    NSURL *url = [NSURL URLWithString:@"file:///Users/allen/Desktop/contact.txt" ];
+//从NSUserDefaults中读取数据
+-(void)readNSUserDefaults
+{
+    NSUserDefaults *userDefaultes = [NSUserDefaults standardUserDefaults];
     
-//    NSString *textFileContents = [NSString stringWithContentsOfFile:@"file:///Users/allen/Desktop/contact.txt" encoding:NSUTF8StringEncoding error: &error];
-//    NSURL *url = [NSURL URLWithString:@"file:///Users/allen/Desktop/contact.txt" ];
-//    NSString *textFileContents = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error];
-    if(textFileContents == nil)
-    {
-        NSLog(@"Error:No Find File");
+    //读取数据到各个label中
+    //读取整型int类型的数据
+    self.iHistoryCount = [userDefaultes integerForKey:@"iHistoryCount"];
+    NSLog(@"readNSUserDefaults -- %d",self.iHistoryCount);
+    self.historyCount.text = [NSString stringWithFormat:@"%d",self.iHistoryCount];
+}
+
+//保存数据到NSUserDefaults
+-(void)saveNSUserDefaults
+{
+    //将上述数据全部存储到NSUserDefaults中
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    //存储时，除NSNumber类型使用对应的类型意外，其他的都是使用setObject:forKey:
+    NSLog(@"saveNSUserDefaults  --- %d", [self.importCount.text intValue]);
+    self.iHistoryCount = [self.importCount.text intValue] + self.iHistoryCount;
+    [userDefaults setInteger:self.iHistoryCount forKey:@"iHistoryCount"];
+    
+    //这里建议同步存储到磁盘中，但是不是必须的
+    [userDefaults synchronize];
+    
+}
+
+- (NSArray *)arrayPhone
+{
+    
+    if (_arrayPhone == nil) {
+        NSError *error;
+        NSString *textFileContentsPhone = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"phone" ofType:@"txt"] encoding:NSUTF8StringEncoding error: &error];
+        if(textFileContentsPhone == nil)
+        {
+            return nil;
+        }
+        _arrayPhone = [textFileContentsPhone componentsSeparatedByString:@"\n"];
     }
-    else
+    return _arrayPhone;
+}
+
+- (NSArray *)arrayContact
+{
+    if (_arrayContact == nil) {
+        NSError *error;
+        NSString *textFileContentsContact = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"contact" ofType:@"txt"] encoding:NSUTF8StringEncoding error: &error];
+        if(textFileContentsContact == nil)
+        {
+            return nil;
+        }
+        _arrayContact = [textFileContentsContact componentsSeparatedByString:@"\n"];
+    }
+    return _arrayContact;
+}
+
+- (IBAction)btnAddContact:(id)sender {
+    
+    
+    self.errorMsg.text = @"";
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    if(self.arrayPhone == nil)
     {
-        NSArray *lines = [textFileContents componentsSeparatedByString:@"\n"];
-        NSLog(@"Number of lines in the file:%ld",[lines count]);
-        NSLog(@"lines is %@",lines);
-        
-//        for (NSString *line in lines) {
-//            [self addContact:line];
-//        }
+        self.errorMsg.text = @"找不到号码文件phone.txt！";
+        self.view.backgroundColor = [UIColor redColor];
+        return;
+    }
+    
+    if (self.check2.selected == YES) {
+        if(self.arrayContact == nil)
+        {
+            self.errorMsg.text = @"找不到姓名文件contact.txt！";
+            self.view.backgroundColor = [UIColor redColor];
+            
+            
+            return;
+        }
+    }
+    NSInteger iImportCount = [self.importCount.text intValue];
+    if(iImportCount < 1)
+    {
+        self.errorMsg.text = @"批次导入数量必须大于0！";
+        self.view.backgroundColor = [UIColor redColor];
+        return;
+    }
+    
+    //如果历史数量+当前导入数量>号码数组数量，则报错
+    if (self.iHistoryCount + iImportCount > [self.arrayPhone count]) {
+        self.errorMsg.text =[NSString stringWithFormat:@"失败：批次导入数量[%d]大于号码剩于数量[%d]！",iImportCount,[self.arrayPhone count]-self.iHistoryCount];
+        self.view.backgroundColor = [UIColor redColor];
+        return;
+    }
+    
+    
+    NSInteger iMaxCount =self.iHistoryCount + iImportCount;
+    
+    for (NSInteger index=self.iHistoryCount; index < iMaxCount; index ++) {
+        NSString *phone = [self.arrayPhone objectAtIndex:index];
+        [self addContact:phone];
+    }
+    self.iHistoryCount = iMaxCount;
+    NSString *cCount =[NSString stringWithFormat:@"%ld",self.iHistoryCount];
+    self.importCount.text = cCount;
+    self.errorMsg.text = @"";
+    self.view.backgroundColor = [UIColor greenColor];
+}
+- (IBAction)btnClearHistory:(id)sender {
+}
+
+- (IBAction)btnCheck1:(id)sender {
+    self.check1.selected = !self.check1.selected;
+    if (self.check1.selected == YES) {
+        self.check2.selected = NO;
+    }
+}
+
+- (IBAction)btncheck2:(id)sender {
+    self.check2.selected = !self.check2.selected;
+    if (self.check2.selected == YES) {
+        self.check1.selected = NO;
     }
 }
 
 
+- (IBAction)btnClearContact:(id)sender {
+}
 
 //add contact
 -(void)addContact:(NSString* )line{
