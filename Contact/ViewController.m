@@ -85,8 +85,8 @@
     //将上述数据全部存储到NSUserDefaults中
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     //存储时，除NSNumber类型使用对应的类型意外，其他的都是使用setObject:forKey:
-    NSLog(@"saveNSUserDefaults  --- %d", [self.importCount.text intValue]);
-    self.iHistoryCount = [self.importCount.text intValue] + self.iHistoryCount;
+    //NSLog(@"saveNSUserDefaults  --- %d", [self.importCount.text intValue]);
+    //self.iHistoryCount = [self.importCount.text intValue] + self.iHistoryCount;
     [userDefaults setInteger:self.iHistoryCount forKey:@"iHistoryCount"];
     
     //这里建议同步存储到磁盘中，但是不是必须的
@@ -131,7 +131,7 @@
     
     if(self.arrayPhone == nil)
     {
-        self.errorMsg.text = @"找不到号码文件phone.txt！";
+        self.errorMsg.text = @"找不到号码文件phone.txt，或者文件里面没数据！";
         self.view.backgroundColor = [UIColor redColor];
         return;
     }
@@ -139,10 +139,8 @@
     if (self.check2.selected == YES) {
         if(self.arrayContact == nil)
         {
-            self.errorMsg.text = @"找不到姓名文件contact.txt！";
+            self.errorMsg.text = @"找不到姓名文件contact.txt，或者文件里面没数据！";
             self.view.backgroundColor = [UIColor redColor];
-            
-            
             return;
         }
     }
@@ -163,18 +161,29 @@
     
     
     NSInteger iMaxCount =self.iHistoryCount + iImportCount;
-    
+    NSLog(@"iMaxCount----%ld",iMaxCount);
     for (NSInteger index=self.iHistoryCount; index < iMaxCount; index ++) {
         NSString *phone = [self.arrayPhone objectAtIndex:index];
         [self addContact:phone];
     }
     self.iHistoryCount = iMaxCount;
+    [self saveNSUserDefaults];
+    NSLog(@"iHistoryCount----%ld",self.iHistoryCount);
     NSString *cCount =[NSString stringWithFormat:@"%ld",self.iHistoryCount];
-    self.importCount.text = cCount;
-    self.errorMsg.text = @"";
+    self.historyCount.text = cCount;
+    self.errorMsg.text = @"批量导入数据成功！";
     self.view.backgroundColor = [UIColor greenColor];
 }
 - (IBAction)btnClearHistory:(id)sender {
+    //将上述数据全部存储到NSUserDefaults中
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setInteger:0 forKey:@"iHistoryCount"];
+    //这里建议同步存储到磁盘中，但是不是必须的
+    [userDefaults synchronize];
+    self.historyCount.text = @"0";
+    self.iHistoryCount = 0;
+    self.errorMsg.text = @"清空历史成功！";
+    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 - (IBAction)btnCheck1:(id)sender {
@@ -193,21 +202,51 @@
 
 
 - (IBAction)btnClearContact:(id)sender {
+    // 初始化并创建通讯录对象，记得释放内存
+    ABAddressBookRef addressBook =ABAddressBookCreate();
+    // 获取通讯录中所有的联系人
+    NSArray *array = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(addressBook);
+    // 遍历所有的联系人并删除
+    for (id obj in array) {
+        ABRecordRef people = (__bridge ABRecordRef)obj;
+        //(这里只删除姓名为张三的)
+        //NSString *firstName = (NSString*)ABRecordCopyValue(people, kABPersonFirstNameProperty);
+        //NSString *lastName = (NSString*)ABRecordCopyValue(people, kABPersonLastNameProperty);
+        //if ([firstName isEqualToString:@"三"] &&[lastName isEqualToString:@"张"]) {
+            ABAddressBookRemoveRecord(addressBook, people,NULL);
+        //}
+    }
+    // 保存修改的通讯录对象
+    ABAddressBookSave(addressBook, NULL);
+    // 释放通讯录对象的内存
+    if (addressBook) {
+        CFRelease(addressBook);
+    }
+
+    self.errorMsg.text = @"清空通讯录成功！";
+    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 //add contact
--(void)addContact:(NSString* )line{
+-(void)addContact:(NSString* )phone{
     
     ABAddressBookRef iPhoneAddressBook = ABAddressBookCreate();
     ABRecordRef newPerson = ABPersonCreate();
     CFErrorRef error = NULL;
-//    NSLog(@"%@",self.txtName.text);
-//    ABRecordSetValue(newPerson, kABPersonFirstNameProperty, (__bridge CFTypeRef)(self.txtName.text), &error);
-//    NSLog(@"%@",self.txtPhone.text);
+    
+    //姓名默认为手机号
+    if (self.check1.selected == YES) {
+        ABRecordSetValue(newPerson, kABPersonFirstNameProperty, (__bridge CFTypeRef)phone, &error);
+    }
+    //姓名根据文件中的数据随机生成
+    if (self.check2.selected == YES) {
+        int r = arc4random() % [self.arrayContact count];
+        ABRecordSetValue(newPerson, kABPersonFirstNameProperty, (__bridge CFTypeRef)[self.arrayContact objectAtIndex:r], &error);
+    }
     
     //创建一个多值属性(电话)
     ABMutableMultiValueRef multi = ABMultiValueCreateMutable(kABMultiStringPropertyType);
-    ABMultiValueAddValueAndLabel(multi, (__bridge CFTypeRef)line, kABPersonPhoneMobileLabel, NULL);
+    ABMultiValueAddValueAndLabel(multi, (__bridge CFTypeRef)phone, kABPersonPhoneMobileLabel, NULL);
     ABRecordSetValue(newPerson, kABPersonPhoneProperty, multi, &error);
     
     ABAddressBookAddRecord(iPhoneAddressBook, newPerson, &error);
@@ -215,6 +254,11 @@
     CFRelease(newPerson);
     CFRelease(iPhoneAddressBook);
 
-    NSLog(@"添加成功！");
+    NSLog(@"添加成功！---%@",phone);
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self.importCount resignFirstResponder];
 }
 @end
