@@ -227,7 +227,11 @@
     self.view.backgroundColor = [UIColor whiteColor];
 }
 
-//add contact
+/**
+ *  添加通讯录
+ *
+ *  @param phone 手机号码
+ */
 -(void)addContact:(NSString* )phone{
     
     ABAddressBookRef iPhoneAddressBook = ABAddressBookCreate();
