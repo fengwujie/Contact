@@ -20,6 +20,18 @@
 //姓名随机生成
 @property (weak, nonatomic) IBOutlet UIButton *check2;
 @property (weak, nonatomic) IBOutlet UILabel *errorMsg;
+/**
+ *  上限数量
+ */
+@property (weak, nonatomic) IBOutlet UITextField *maxCount;
+/**
+ *  默认导入文件名
+ */
+@property (weak, nonatomic) IBOutlet UITextField *defaultTxtName;
+/**
+ *  通讯录来源文件名
+ */
+@property (weak, nonatomic) IBOutlet UITextField *contactTxtName;
 
 @property (assign, nonatomic) NSInteger iHistoryCount;
 @property (strong,nonatomic) NSArray *arrayPhone;
