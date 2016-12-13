@@ -11,14 +11,25 @@
 #import <AddressBookUI/AddressBookUI.h>
 
 @interface ViewController ()
-//历史数量值
+/**
+ *  历史数量Lable控件
+ */
 @property (weak, nonatomic) IBOutlet UILabel *historyCount;
-//批次导入数量值
+/**
+ *  批次导入数量值Text控件
+ */
 @property (weak, nonatomic) IBOutlet UITextField *importCount;
-//姓名默认为手机号
+/**
+ *  姓名默认为手机号CHK控件
+ */
 @property (weak, nonatomic) IBOutlet UIButton *check1;
-//姓名随机生成
+/**
+ *  姓名随机生成CHK控件
+ */
 @property (weak, nonatomic) IBOutlet UIButton *check2;
+/**
+ *  错误信息显示Lable控件
+ */
 @property (weak, nonatomic) IBOutlet UILabel *errorMsg;
 /**
  *  上限数量
@@ -31,11 +42,24 @@
 /**
  *  通讯录来源文件名
  */
-@property (weak, nonatomic) IBOutlet UITextField *contactTxtName;
+@property (weak, nonatomic) IBOutlet UITextField *phoneTxtName;
 
+/**
+ *  历史数量
+ */
 @property (assign, nonatomic) NSInteger iHistoryCount;
+/**
+ *  电话号码数组
+ */
 @property (strong,nonatomic) NSArray *arrayPhone;
+/**
+ *  姓名数组
+ */
 @property (strong,nonatomic) NSArray *arrayContact;
+/**
+ *  默认电话号码数组
+ */
+@property (strong,nonatomic) NSArray *arrayPhoneDefault;
 //清空通讯录
 - (IBAction)btnClearContact:(id)sender;
 //添加通讯录
@@ -105,22 +129,64 @@
     [userDefaults synchronize];
     
 }
-
-- (NSArray *)arrayPhone
+/**
+ *  缓存默认电话号码数组
+ */
+- (NSArray *)arrayPhoneDefault
 {
-    
-    if (_arrayPhone == nil) {
+    if (_arrayPhoneDefault == nil) {
+        NSString *strDefaultTxtName = self.defaultTxtName.text;
+        if(strDefaultTxtName.length ==0) return nil;
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:strDefaultTxtName ofType:@""];
+        if(filePath == nil)
+        {
+            self.errorMsg.text = [NSString stringWithFormat:@"文件%@不存在！",strDefaultTxtName];
+            self.view.backgroundColor = [UIColor redColor];
+            return nil;
+        }
         NSError *error;
-        NSString *textFileContentsPhone = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"phone" ofType:@"txt"] encoding:NSUTF8StringEncoding error: &error];
+        NSString *textFileContentsPhone = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error: &error];
         if(textFileContentsPhone == nil)
         {
+            self.errorMsg.text = [NSString stringWithFormat:@"文件%@没数据！",strDefaultTxtName];
+            self.view.backgroundColor = [UIColor redColor];
+            return nil;
+        }
+        _arrayPhoneDefault = [textFileContentsPhone componentsSeparatedByString:@"\n"];
+    }
+    return _arrayPhoneDefault;
+}
+/**
+ *  缓存电话号码数组
+ */
+- (NSArray *)arrayPhone
+{
+    if (_arrayPhone == nil) {
+        NSString *strPhoneTxtName = self.phoneTxtName.text;
+        if(strPhoneTxtName.length ==0) return nil;
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:strPhoneTxtName ofType:@""];
+        if(filePath == nil)
+        {
+            self.errorMsg.text = [NSString stringWithFormat:@"文件%@不存在！",strPhoneTxtName];
+            self.view.backgroundColor = [UIColor redColor];
+            return nil;
+        }
+
+        NSError *error;
+        NSString *textFileContentsPhone = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error: &error];
+        if(textFileContentsPhone == nil)
+        {
+            self.errorMsg.text = [NSString stringWithFormat:@"文件%@没数据！",strPhoneTxtName];
+            self.view.backgroundColor = [UIColor redColor];
             return nil;
         }
         _arrayPhone = [textFileContentsPhone componentsSeparatedByString:@"\n"];
     }
     return _arrayPhone;
 }
-
+/**
+ *  缓存联系人数组
+ */
 - (NSArray *)arrayContact
 {
     if (_arrayContact == nil) {
@@ -128,6 +194,8 @@
         NSString *textFileContentsContact = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"contact" ofType:@"txt"] encoding:NSUTF8StringEncoding error: &error];
         if(textFileContentsContact == nil)
         {
+            self.errorMsg.text = @"找不到姓名文件contact.txt，或者文件里面没数据！";
+            self.view.backgroundColor = [UIColor redColor];
             return nil;
         }
         _arrayContact = [textFileContentsContact componentsSeparatedByString:@"\n"];
@@ -143,36 +211,108 @@
     
     if(self.arrayPhone == nil)
     {
-        self.errorMsg.text = @"找不到号码文件phone.txt，或者文件里面没数据！";
-        self.view.backgroundColor = [UIColor redColor];
+//        self.errorMsg.text =[NSString stringWithFormat:@"找不到号码文件%@，或者文件里面没数据！",strPhoneTxtName];
+//        self.view.backgroundColor = [UIColor redColor];
         return;
     }
     
     if (self.check2.selected == YES) {
         if(self.arrayContact == nil)
         {
-            self.errorMsg.text = @"找不到姓名文件contact.txt，或者文件里面没数据！";
-            self.view.backgroundColor = [UIColor redColor];
+//            self.errorMsg.text = @"找不到姓名文件contact.txt，或者文件里面没数据！";
+//            self.view.backgroundColor = [UIColor redColor];
             return;
         }
     }
-    NSInteger iImportCount = [self.importCount.text intValue];
-    if(iImportCount < 1)
+    NSInteger iBatchCount = [self.importCount.text intValue];
+    if(iBatchCount < 1)
     {
         self.errorMsg.text = @"批次导入数量必须大于0！";
         self.view.backgroundColor = [UIColor redColor];
         return;
     }
+    //添加默认手机号码
+    [self addDefaultContact];
     
+    //如果历史数量>=电话数组数量，则提示“通讯录xx已全部导入完成，或清空历史记录重试”
+    if(self.iHistoryCount >= self.arrayPhone.count)
+    {
+        self.errorMsg.text = [NSString stringWithFormat:@"通讯录[%@]已全部导入完成，或清空历史记录重试！",self.phoneTxtName.text];
+        return;
+    }
+    NSInteger iMaxCount = [self.maxCount.text intValue];  //上限数量
+    NSInteger iBeginIndex =0;
+    NSInteger iEndIndex=0;
+    NSInteger iArrayPhoneTemp =self.arrayPhone.count;
+    NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",iArrayPhoneTemp]);
+    //如果历史数量<上限数量
+    if(_iHistoryCount<iMaxCount)
+    {
+        NSInteger iDiffCount = iMaxCount - _iHistoryCount;  //上限数量 减去 历史数量的差距
+        //如果差距数量>批次导入数量
+        if(iDiffCount > iBatchCount)
+        {
+            //如果（历史数量+批次导入数量）>=电话总数
+            if((_iHistoryCount + iBatchCount) <= iArrayPhoneTemp)
+            {
+                iBeginIndex = 0;
+                iEndIndex = _iHistoryCount + iBatchCount;
+            }
+            else
+            {
+                iBeginIndex = 0;
+                iEndIndex = iArrayPhoneTemp;
+            }
+        }
+        else
+        {
+            //（如果历史数量+批次导入的数量）>电话总数
+            if((_iHistoryCount + iBatchCount)>iArrayPhoneTemp)
+            {
+                iBeginIndex = 0;
+                iEndIndex = iArrayPhoneTemp;
+            }
+            else
+            {
+                iBeginIndex =_iHistoryCount + iBatchCount - iMaxCount;
+                iEndIndex =_iHistoryCount + iBatchCount;
+            }
+        }
+    }
+    else
+    {
+        NSInteger iDiffCount = _iHistoryCount - iMaxCount;  //历史数量 减去 上限数量的差距
+        iBeginIndex = iDiffCount + iBatchCount;
+        //如果(历史数量+批次导入数量)>电话总数
+        if((_iHistoryCount + iBatchCount) >iArrayPhoneTemp)
+        {
+            iEndIndex = _iHistoryCount + iBatchCount;
+        }
+        else
+        {
+            iEndIndex = iArrayPhoneTemp;
+        }
+    }
+    NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",iBeginIndex,iEndIndex]);
+    for (NSInteger index=iBeginIndex; index < iEndIndex; index ++) {
+        NSString *phone = [self.arrayPhone objectAtIndex:index];
+        [self addContact:phone];
+    }
+    self.iHistoryCount = iEndIndex;
+    NSString *cCount =[NSString stringWithFormat:@"%ld",iEndIndex];
+    self.historyCount.text = cCount;
+    self.errorMsg.text = @"批量导入数据成功！";
+    self.view.backgroundColor = [UIColor greenColor];
+    
+    /*
     //如果历史数量+当前导入数量>号码数组数量，则报错
-    if (self.iHistoryCount + iImportCount > [self.arrayPhone count]) {
-        self.errorMsg.text =[NSString stringWithFormat:@"失败：批次导入数量[%d]大于号码剩于数量[%d]！",iImportCount,[self.arrayPhone count]-self.iHistoryCount];
+    if (self.iHistoryCount + iBatchCount > [self.arrayPhone count]) {
+        self.errorMsg.text =[NSString stringWithFormat:@"失败：批次导入数量[%d]大于号码剩于数量[%d]！",iBatchCount,[self.arrayPhone count]-self.iHistoryCount];
         self.view.backgroundColor = [UIColor redColor];
         return;
     }
     
-    
-    NSInteger iMaxCount =self.iHistoryCount + iImportCount;
+    NSInteger iMaxCount =self.iHistoryCount + iBatchCount;
     NSLog(@"iMaxCount----%ld",iMaxCount);
     for (NSInteger index=self.iHistoryCount; index < iMaxCount; index ++) {
         NSString *phone = [self.arrayPhone objectAtIndex:index];
@@ -185,7 +325,20 @@
     self.historyCount.text = cCount;
     self.errorMsg.text = @"批量导入数据成功！";
     self.view.backgroundColor = [UIColor greenColor];
+    */
 }
+/**
+ *  添加默认手机号码
+ */
+-(void)addDefaultContact
+{
+    if(self.arrayPhoneDefault==nil || self.arrayPhoneDefault.count==0) return;
+    for (NSInteger index=0; index < self.arrayPhoneDefault.count; index ++) {
+        NSString *phone = [self.arrayPhoneDefault objectAtIndex:index];
+        [self addContact:phone];
+    }
+}
+
 - (IBAction)btnClearHistory:(id)sender {
     //将上述数据全部存储到NSUserDefaults中
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];

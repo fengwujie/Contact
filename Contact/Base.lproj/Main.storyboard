@@ -70,13 +70,13 @@
                                                     <constraint firstAttribute="width" constant="85" id="f0J-ej-CIP"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="1M3-zE-dJt" userLabel="上限数量值">
                                                 <rect key="frame" x="85" y="0.0" width="55" height="30"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <textInputTraits key="textInputTraits"/>
+                                                <textInputTraits key="textInputTraits" keyboardType="phonePad"/>
                                             </textField>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -204,7 +204,7 @@
                                                     <constraint firstAttribute="width" constant="140" id="Ypc-dU-piP"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="NpQ-A7-CXb" userLabel="默认导入文件名Text">
@@ -234,7 +234,7 @@
                                                     <constraint firstAttribute="width" constant="155" id="BRA-85-cRG"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8yk-pN-aOU" userLabel="通讯录来源文件名Text">
@@ -365,12 +365,12 @@
                     <connections>
                         <outlet property="check1" destination="a7u-Ni-CL5" id="Ezu-Xx-duK"/>
                         <outlet property="check2" destination="C8S-sb-GUG" id="zqF-YF-yMJ"/>
-                        <outlet property="contactTxtName" destination="8yk-pN-aOU" id="OLr-gO-jEK"/>
                         <outlet property="defaultTxtName" destination="NpQ-A7-CXb" id="5Ig-MG-bJg"/>
                         <outlet property="errorMsg" destination="2XF-9K-5Uo" id="Qvg-qL-LKU"/>
                         <outlet property="historyCount" destination="5aS-wn-OoU" id="heW-tp-lh8"/>
                         <outlet property="importCount" destination="pzX-EG-ASd" id="BHO-5M-qZB"/>
                         <outlet property="maxCount" destination="1M3-zE-dJt" id="Xn1-PC-zeN"/>
+                        <outlet property="phoneTxtName" destination="8yk-pN-aOU" id="ew8-KO-eZk"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
