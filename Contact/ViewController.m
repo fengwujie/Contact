@@ -103,16 +103,31 @@
     // Dispose of any resources that can be recreated.
 }
 
-//从NSUserDefaults中读取数据
+/**
+ *  从NSUserDefaults中读取数据
+ *
+ *  @param loadLastPhoneTxtName 是否重新赋值最后一次保存的电话本文件名
+ */
 -(void)readNSUserDefaults
 {
     NSUserDefaults *userDefaultes = [NSUserDefaults standardUserDefaults];
-    
+    self.phoneTxtName.text =[userDefaultes valueForKey:@"lastPhoneTxtName"];
+    self.defaultTxtName.text =[userDefaultes valueForKey:@"lastDefaultTxtName"];
+
     //读取数据到各个label中
     //读取整型int类型的数据
-    self.iHistoryCount = [userDefaultes integerForKey:@"iHistoryCount"];
-    NSLog(@"readNSUserDefaults -- %d",self.iHistoryCount);
-    self.historyCount.text = [NSString stringWithFormat:@"%d",self.iHistoryCount];
+    self.iHistoryCount = [userDefaultes integerForKey:[NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
+    NSLog(@"readNSUserDefaults -- %ld",(long)self.iHistoryCount);
+    self.historyCount.text =self.iHistoryCount == 0 ? 0 : [NSString stringWithFormat:@"%ld",(long)self.iHistoryCount];
+    
+    NSInteger imaxCount =[userDefaultes integerForKey:[NSString stringWithFormat:@"iMaxCount%@",self.phoneTxtName.text]];
+    self.maxCount.text =imaxCount == 0 ? @"" : [NSString stringWithFormat:@"%ld",(long)imaxCount];
+    
+    NSInteger iBatchCount =[userDefaultes integerForKey:[NSString stringWithFormat:@"iBatchCount%@",self.phoneTxtName.text]];
+    self.importCount.text =iBatchCount == 0 ? @"" : [NSString stringWithFormat:@"%ld",(long)iBatchCount];
+    
+    self.check1.selected = [userDefaultes boolForKey:@"check1"];
+    self.check2.selected = [userDefaultes boolForKey:@"check2"];
 }
 
 //保存数据到NSUserDefaults
@@ -123,8 +138,14 @@
     //存储时，除NSNumber类型使用对应的类型意外，其他的都是使用setObject:forKey:
     //NSLog(@"saveNSUserDefaults  --- %d", [self.importCount.text intValue]);
     //self.iHistoryCount = [self.importCount.text intValue] + self.iHistoryCount;
-    [userDefaults setInteger:self.iHistoryCount forKey:@"iHistoryCount"];
+    [userDefaults setInteger:self.iHistoryCount forKey: [NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
+    [userDefaults setInteger:[self.maxCount.text intValue] forKey:[NSString stringWithFormat:@"iMaxCount%@",self.phoneTxtName.text]];
+    [userDefaults setInteger:[self.importCount.text intValue] forKey:[NSString stringWithFormat:@"iBatchCount%@",self.phoneTxtName.text]];
+    [userDefaults setValue:self.phoneTxtName.text forKey:@"lastPhoneTxtName"];
+    [userDefaults setValue:self.defaultTxtName.text forKey:@"lastDefaultTxtName"];
     
+    [userDefaults setBool:self.check1.selected forKey:@"check1"];
+    [userDefaults setBool:self.check2.selected forKey:@"check2"];
     //这里建议同步存储到磁盘中，但是不是必须的
     [userDefaults synchronize];
     
@@ -137,7 +158,7 @@
     if (_arrayPhoneDefault == nil) {
         NSString *strDefaultTxtName = self.defaultTxtName.text;
         if(strDefaultTxtName.length ==0) return nil;
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:strDefaultTxtName ofType:@""];
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:strDefaultTxtName ofType:@"txt"];
         if(filePath == nil)
         {
             self.errorMsg.text = [NSString stringWithFormat:@"文件%@不存在！",strDefaultTxtName];
@@ -164,7 +185,7 @@
     if (_arrayPhone == nil) {
         NSString *strPhoneTxtName = self.phoneTxtName.text;
         if(strPhoneTxtName.length ==0) return nil;
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:strPhoneTxtName ofType:@""];
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:strPhoneTxtName ofType:@"txt"];
         if(filePath == nil)
         {
             self.errorMsg.text = [NSString stringWithFormat:@"文件%@不存在！",strPhoneTxtName];
@@ -209,6 +230,18 @@
     self.errorMsg.text = @"";
     self.view.backgroundColor = [UIColor whiteColor];
     
+    //如果当前通讯录文件名跟参数保存的不一样，则清空电话数组
+    NSUserDefaults *userDefaultes = [NSUserDefaults standardUserDefaults];
+    if (self.phoneTxtName.text !=[userDefaultes valueForKey:@"lastPhoneTxtName"])
+    {
+        _arrayPhone =nil;
+        self.iHistoryCount = [userDefaultes integerForKey:[NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
+        NSLog(@"readNSUserDefaults -- %ld",(long)self.iHistoryCount);
+        self.historyCount.text =self.iHistoryCount == 0 ? 0 : [NSString stringWithFormat:@"%ld",(long)self.iHistoryCount];
+    }
+    if(self.defaultTxtName.text !=[userDefaultes valueForKey:@"lastDefaultTxtName"])
+        _arrayPhoneDefault = nil;
+    
     if(self.arrayPhone == nil)
     {
 //        self.errorMsg.text =[NSString stringWithFormat:@"找不到号码文件%@，或者文件里面没数据！",strPhoneTxtName];
@@ -234,6 +267,13 @@
     //添加默认手机号码
     [self addDefaultContact];
     
+//    NSUserDefaults *userDefaultes = [NSUserDefaults standardUserDefaults];
+//    //读取数据到各个label中
+//    //读取整型int类型的数据
+//    self.iHistoryCount = [userDefaultes integerForKey:[NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
+//    NSLog(@"readNSUserDefaults -- %ld",(long)self.iHistoryCount);
+//    self.historyCount.text =self.iHistoryCount == 0 ? 0 : [NSString stringWithFormat:@"%ld",(long)self.iHistoryCount];
+    
     //如果历史数量>=电话数组数量，则提示“通讯录xx已全部导入完成，或清空历史记录重试”
     if(self.iHistoryCount >= self.arrayPhone.count)
     {
@@ -244,7 +284,7 @@
     NSInteger iBeginIndex =0;
     NSInteger iEndIndex=0;
     NSInteger iArrayPhoneTemp =self.arrayPhone.count;
-    NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",iArrayPhoneTemp]);
+    NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",(long)iArrayPhoneTemp]);
     //如果历史数量<上限数量
     if(_iHistoryCount<iMaxCount)
     {
@@ -284,7 +324,7 @@
         NSInteger iDiffCount = _iHistoryCount - iMaxCount;  //历史数量 减去 上限数量的差距
         iBeginIndex = iDiffCount + iBatchCount;
         //如果(历史数量+批次导入数量)>电话总数
-        if((_iHistoryCount + iBatchCount) >iArrayPhoneTemp)
+        if((_iHistoryCount + iBatchCount) < iArrayPhoneTemp)
         {
             iEndIndex = _iHistoryCount + iBatchCount;
         }
@@ -293,14 +333,15 @@
             iEndIndex = iArrayPhoneTemp;
         }
     }
-    NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",iBeginIndex,iEndIndex]);
+    NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",(long)iBeginIndex,(long)iEndIndex]);
     for (NSInteger index=iBeginIndex; index < iEndIndex; index ++) {
         NSString *phone = [self.arrayPhone objectAtIndex:index];
         [self addContact:phone];
     }
     self.iHistoryCount = iEndIndex;
-    NSString *cCount =[NSString stringWithFormat:@"%ld",iEndIndex];
+    NSString *cCount =[NSString stringWithFormat:@"%ld",(long)iEndIndex];
     self.historyCount.text = cCount;
+    [self saveNSUserDefaults];
     self.errorMsg.text = @"批量导入数据成功！";
     self.view.backgroundColor = [UIColor greenColor];
     
@@ -340,15 +381,23 @@
 }
 
 - (IBAction)btnClearHistory:(id)sender {
-    //将上述数据全部存储到NSUserDefaults中
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setInteger:0 forKey:@"iHistoryCount"];
-    //这里建议同步存储到磁盘中，但是不是必须的
-    [userDefaults synchronize];
-    self.historyCount.text = @"0";
-    self.iHistoryCount = 0;
-    self.errorMsg.text = @"清空历史成功！";
-    self.view.backgroundColor = [UIColor whiteColor];
+    if(self.phoneTxtName.text ==nil)
+    {
+        self.errorMsg.text = @"通讯录文件名不能为空！";
+        self.view.backgroundColor = [UIColor redColor];
+    }
+    else
+    {
+        //将上述数据全部存储到NSUserDefaults中
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setInteger:0 forKey:[NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
+        //这里建议同步存储到磁盘中，但是不是必须的
+        [userDefaults synchronize];
+        self.historyCount.text = @"0";
+        self.iHistoryCount = 0;
+        self.errorMsg.text = @"清空历史成功！";
+        self.view.backgroundColor = [UIColor whiteColor];
+    }
 }
 
 - (IBAction)btnCheck1:(id)sender {
