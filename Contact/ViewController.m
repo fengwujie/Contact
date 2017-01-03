@@ -242,10 +242,10 @@
     if(self.defaultTxtName.text !=[userDefaultes valueForKey:@"lastDefaultTxtName"])
         _arrayPhoneDefault = nil;
     
-    if(self.arrayPhone == nil)
+    if((self.arrayPhone == nil || self.arrayPhone.count==0) && (self.arrayPhoneDefault==nil || self.arrayPhoneDefault.count==0))
     {
-//        self.errorMsg.text =[NSString stringWithFormat:@"找不到号码文件%@，或者文件里面没数据！",strPhoneTxtName];
-//        self.view.backgroundColor = [UIColor redColor];
+        self.errorMsg.text =@"【默认导入文件名】和【通讯录来源文件名】都不存在号码！";
+        self.view.backgroundColor = [UIColor redColor];
         return;
     }
     
@@ -258,12 +258,13 @@
         }
     }
     NSInteger iBatchCount = [self.importCount.text intValue];
-    if(iBatchCount < 1)
-    {
-        self.errorMsg.text = @"批次导入数量必须大于0！";
-        self.view.backgroundColor = [UIColor redColor];
-        return;
-    }
+    //批次导入数量为0时，也允许导入，单单只导入默认文件的电话号码20170103
+//    if(iBatchCount < 1)
+//    {
+//        self.errorMsg.text = @"批次导入数量必须大于0！";
+//        self.view.backgroundColor = [UIColor redColor];
+//        return;
+//    }
     //添加默认手机号码
     [self addDefaultContact];
     
@@ -274,6 +275,8 @@
 //    NSLog(@"readNSUserDefaults -- %ld",(long)self.iHistoryCount);
 //    self.historyCount.text =self.iHistoryCount == 0 ? 0 : [NSString stringWithFormat:@"%ld",(long)self.iHistoryCount];
     
+    if(_arrayPhone.count>0)
+    {
     //如果历史数量>=电话数组数量，则提示“通讯录xx已全部导入完成，或清空历史记录重试”
     if(self.iHistoryCount >= self.arrayPhone.count)
     {
@@ -342,6 +345,7 @@
     NSString *cCount =[NSString stringWithFormat:@"%ld",(long)iEndIndex];
     self.historyCount.text = cCount;
     [self saveNSUserDefaults];
+    }
     self.errorMsg.text = @"批量导入数据成功！";
     self.view.backgroundColor = [UIColor greenColor];
     
