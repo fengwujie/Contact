@@ -277,78 +277,88 @@
     
     if(_arrayPhone.count>0)
     {
-    //如果历史数量>=电话数组数量，则提示“通讯录xx已全部导入完成，或清空历史记录重试”
-    if(self.iHistoryCount >= self.arrayPhone.count)
-    {
-        self.errorMsg.text = [NSString stringWithFormat:@"通讯录[%@]已全部导入完成，或清空历史记录重试！",self.phoneTxtName.text];
-        return;
-    }
-    NSInteger iMaxCount = [self.maxCount.text intValue];  //上限数量
-    NSInteger iBeginIndex =0;
-    NSInteger iEndIndex=0;
-    NSInteger iArrayPhoneTemp =self.arrayPhone.count;
-    NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",(long)iArrayPhoneTemp]);
-    //如果历史数量<上限数量
-    if(_iHistoryCount<iMaxCount)
-    {
-        NSInteger iDiffCount = iMaxCount - _iHistoryCount;  //上限数量 减去 历史数量的差距
-        //如果差距数量>批次导入数量
-        if(iDiffCount > iBatchCount)
+        //如果历史数量>=电话数组数量，则提示“通讯录xx已全部导入完成，或清空历史记录重试”
+        if(self.iHistoryCount >= self.arrayPhone.count)
         {
-            //如果（历史数量+批次导入数量）>=电话总数
-            if((_iHistoryCount + iBatchCount) <= iArrayPhoneTemp)
+            self.errorMsg.text = [NSString stringWithFormat:@"通讯录[%@]已全部导入完成，或清空历史记录重试！",self.phoneTxtName.text];
+            self.view.backgroundColor = [UIColor redColor];
+            return;
+        }
+        NSInteger iMaxCount = [self.maxCount.text intValue];  //上限数量
+        NSInteger iBeginIndex =0;
+        NSInteger iEndIndex=0;
+        NSInteger iArrayPhoneTemp =self.arrayPhone.count;
+        NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",(long)iArrayPhoneTemp]);
+        //如果历史数量<上限数量
+        if(_iHistoryCount<iMaxCount)
+        {
+            NSInteger iDiffCount = iMaxCount - _iHistoryCount;  //上限数量 减去 历史数量的差距
+            //如果差距数量>批次导入数量
+            if(iDiffCount > iBatchCount)
             {
-                iBeginIndex = 0;
+                //如果（历史数量+批次导入数量）>=电话总数
+                if((_iHistoryCount + iBatchCount) <= iArrayPhoneTemp)
+                {
+                    iBeginIndex = 0;
+                    iEndIndex = _iHistoryCount + iBatchCount;
+                }
+                else
+                {
+                    iBeginIndex = 0;
+                    iEndIndex = iArrayPhoneTemp;
+                }
+            }
+            else
+            {
+                //（如果历史数量+批次导入的数量）>电话总数
+                if((_iHistoryCount + iBatchCount)>iArrayPhoneTemp)
+                {
+                    iBeginIndex = 0;
+                    iEndIndex = iArrayPhoneTemp;
+                }
+                else
+                {
+                    iBeginIndex =_iHistoryCount + iBatchCount - iMaxCount;
+                    iEndIndex =_iHistoryCount + iBatchCount;
+                }
+            }
+        }
+        else
+        {
+            NSInteger iDiffCount = _iHistoryCount - iMaxCount;  //历史数量 减去 上限数量的差距
+            iBeginIndex = iDiffCount + iBatchCount;
+            //如果(历史数量+批次导入数量)>电话总数
+            if((_iHistoryCount + iBatchCount) < iArrayPhoneTemp)
+            {
                 iEndIndex = _iHistoryCount + iBatchCount;
             }
             else
             {
-                iBeginIndex = 0;
                 iEndIndex = iArrayPhoneTemp;
             }
         }
-        else
-        {
-            //（如果历史数量+批次导入的数量）>电话总数
-            if((_iHistoryCount + iBatchCount)>iArrayPhoneTemp)
-            {
-                iBeginIndex = 0;
-                iEndIndex = iArrayPhoneTemp;
-            }
-            else
-            {
-                iBeginIndex =_iHistoryCount + iBatchCount - iMaxCount;
-                iEndIndex =_iHistoryCount + iBatchCount;
-            }
+        NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",(long)iBeginIndex,(long)iEndIndex]);
+        for (NSInteger index=iBeginIndex; index < iEndIndex; index ++) {
+            NSString *phone = [self.arrayPhone objectAtIndex:index];
+            [self addContact:phone];
         }
+        self.iHistoryCount = iEndIndex;
+        NSString *cCount =[NSString stringWithFormat:@"%ld",(long)iEndIndex];
+        self.historyCount.text = cCount;
+        [self saveNSUserDefaults];
+        self.errorMsg.text = @"批量导入数据成功！";
+        self.view.backgroundColor = [UIColor greenColor];
+    }
+    else if(iBatchCount>0)
+    {
+        self.errorMsg.text = [NSString stringWithFormat:@"通讯录[%@]已全部导入完成，或清空历史记录重试！",self.phoneTxtName.text];
+        self.view.backgroundColor = [UIColor redColor];
     }
     else
     {
-        NSInteger iDiffCount = _iHistoryCount - iMaxCount;  //历史数量 减去 上限数量的差距
-        iBeginIndex = iDiffCount + iBatchCount;
-        //如果(历史数量+批次导入数量)>电话总数
-        if((_iHistoryCount + iBatchCount) < iArrayPhoneTemp)
-        {
-            iEndIndex = _iHistoryCount + iBatchCount;
-        }
-        else
-        {
-            iEndIndex = iArrayPhoneTemp;
-        }
+        self.errorMsg.text = @"批量导入数据成功！";
+        self.view.backgroundColor = [UIColor greenColor];
     }
-    NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",(long)iBeginIndex,(long)iEndIndex]);
-    for (NSInteger index=iBeginIndex; index < iEndIndex; index ++) {
-        NSString *phone = [self.arrayPhone objectAtIndex:index];
-        [self addContact:phone];
-    }
-    self.iHistoryCount = iEndIndex;
-    NSString *cCount =[NSString stringWithFormat:@"%ld",(long)iEndIndex];
-    self.historyCount.text = cCount;
-    [self saveNSUserDefaults];
-    }
-    self.errorMsg.text = @"批量导入数据成功！";
-    self.view.backgroundColor = [UIColor greenColor];
-    
     /*
     //如果历史数量+当前导入数量>号码数组数量，则报错
     if (self.iHistoryCount + iBatchCount > [self.arrayPhone count]) {
