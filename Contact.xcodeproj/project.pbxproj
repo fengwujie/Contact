@@ -7,10 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9F827B351DFEC64E00696DA2 /* default.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9F827B341DFEC64E00696DA2 /* default.txt */; };
-		9FB766131CEB738F0088F3F6 /* phone.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9FB766121CEB738F0088F3F6 /* phone.txt */; };
 		9FB766151CEB74390088F3F6 /* contact.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9FB766141CEB74390088F3F6 /* contact.txt */; };
-		9FDAB6A81E013DC800A5DB92 /* telphone.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9FDAB6A71E013DC800A5DB92 /* telphone.txt */; };
 		9FF8FD1B1CE869D00028B4B0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FF8FD1A1CE869D00028B4B0 /* main.m */; };
 		9FF8FD1E1CE869D00028B4B0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FF8FD1D1CE869D00028B4B0 /* AppDelegate.m */; };
 		9FF8FD211CE869D00028B4B0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FF8FD201CE869D00028B4B0 /* ViewController.m */; };
@@ -40,10 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		9F827B341DFEC64E00696DA2 /* default.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = default.txt; sourceTree = "<group>"; };
-		9FB766121CEB738F0088F3F6 /* phone.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phone.txt; sourceTree = "<group>"; };
 		9FB766141CEB74390088F3F6 /* contact.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = contact.txt; sourceTree = "<group>"; };
-		9FDAB6A71E013DC800A5DB92 /* telphone.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = telphone.txt; sourceTree = "<group>"; };
 		9FF8FD161CE869CF0028B4B0 /* Contact.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Contact.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FF8FD1A1CE869D00028B4B0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9FF8FD1C1CE869D00028B4B0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -129,10 +123,7 @@
 		9FF8FD191CE869D00028B4B0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				9FDAB6A71E013DC800A5DB92 /* telphone.txt */,
-				9F827B341DFEC64E00696DA2 /* default.txt */,
 				9FB766141CEB74390088F3F6 /* contact.txt */,
-				9FB766121CEB738F0088F3F6 /* phone.txt */,
 				9FF8FD1A1CE869D00028B4B0 /* main.m */,
 			);
 			name = "Supporting Files";
@@ -262,11 +253,8 @@
 			files = (
 				9FF8FD291CE869D00028B4B0 /* LaunchScreen.storyboard in Resources */,
 				9FF8FD261CE869D00028B4B0 /* Assets.xcassets in Resources */,
-				9F827B351DFEC64E00696DA2 /* default.txt in Resources */,
-				9FDAB6A81E013DC800A5DB92 /* telphone.txt in Resources */,
 				9FB766151CEB74390088F3F6 /* contact.txt in Resources */,
 				9FF8FD241CE869D00028B4B0 /* Main.storyboard in Resources */,
-				9FB766131CEB738F0088F3F6 /* phone.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

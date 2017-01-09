@@ -112,8 +112,11 @@
 {
     NSUserDefaults *userDefaultes = [NSUserDefaults standardUserDefaults];
     self.phoneTxtName.text =[userDefaultes valueForKey:@"lastPhoneTxtName"];
+    if([self.phoneTxtName.text isEqual:@""])
+        self.phoneTxtName.text = @"phone";
     self.defaultTxtName.text =[userDefaultes valueForKey:@"lastDefaultTxtName"];
-
+    if([self.defaultTxtName.text isEqual:@""])
+        self.defaultTxtName.text = @"default";
     //读取数据到各个label中
     //读取整型int类型的数据
     self.iHistoryCount = [userDefaultes integerForKey:[NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
@@ -122,10 +125,14 @@
     
     NSInteger imaxCount =[userDefaultes integerForKey:[NSString stringWithFormat:@"iMaxCount%@",self.phoneTxtName.text]];
     self.maxCount.text =imaxCount == 0 ? @"" : [NSString stringWithFormat:@"%ld",(long)imaxCount];
-    
+    if ([self.maxCount.text isEqual:@""]) {
+        self.maxCount.text = @"0";
+    }
     NSInteger iBatchCount =[userDefaultes integerForKey:[NSString stringWithFormat:@"iBatchCount%@",self.phoneTxtName.text]];
     self.importCount.text =iBatchCount == 0 ? @"" : [NSString stringWithFormat:@"%ld",(long)iBatchCount];
-    
+    if ([self.importCount.text isEqual:@""]) {
+        self.importCount.text = @"0";
+    }
     self.check1.selected = [userDefaultes boolForKey:@"check1"];
     self.check2.selected = [userDefaultes boolForKey:@"check2"];
 }
@@ -242,12 +249,20 @@
     if(self.defaultTxtName.text !=[userDefaultes valueForKey:@"lastDefaultTxtName"])
         _arrayPhoneDefault = nil;
     
-    if((self.arrayPhone == nil || self.arrayPhone.count==0) && (self.arrayPhoneDefault==nil || self.arrayPhoneDefault.count==0))
-    {
-        self.errorMsg.text =@"【默认导入文件名】和【通讯录来源文件名】都不存在号码！";
-        self.view.backgroundColor = [UIColor redColor];
+//    if((self.arrayPhone == nil || self.arrayPhone.count==0) && (self.arrayPhoneDefault==nil || self.arrayPhoneDefault.count==0))
+//    {
+//        self.errorMsg.text =@"【默认导入文件名】和【通讯录来源文件名】都不存在号码！";
+//        self.view.backgroundColor = [UIColor redColor];
+//        return;
+//    }
+    if (self.arrayPhone == nil || self.arrayPhone.count==0) {
         return;
     }
+    if(self.arrayPhoneDefault == nil || self.arrayPhoneDefault.count == 0)
+    {
+        return;
+    }
+    
     
     if (self.check2.selected == YES) {
         if(self.arrayContact == nil)
