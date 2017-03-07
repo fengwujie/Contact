@@ -9,6 +9,11 @@
 #import "ViewController.h"
 #import <AddressBook/AddressBook.h>
 #import <AddressBookUI/AddressBookUI.h>
+#import <ContactsUI/ContactsUI.h>
+
+#define IS_iOS9 [[UIDevice currentDevice].systemVersion floatValue] >= 9.0f
+#define IS_iOS8 [[UIDevice currentDevice].systemVersion floatValue] >= 8.0f
+#define IS_iOS6 [[UIDevice currentDevice].systemVersion floatValue] >= 6.0f
 
 @interface ViewController ()
 /**
@@ -70,7 +75,10 @@
 - (IBAction)btnCheck1:(id)sender;
 //姓名随机生成
 - (IBAction)btncheck2:(id)sender;
-
+/**
+ *  版本号
+ */
+@property (weak, nonatomic) IBOutlet UILabel *labVersion;
 @end
 
 @implementation ViewController
@@ -78,9 +86,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
+    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    self.labVersion.text = [NSString stringWithFormat:@"版本号(%@)",[infoDictionary objectForKey:@"CFBundleShortVersionString"]];
     [self readNSUserDefaults];
     
+    /*
     //1.获取授权状态
     ABAuthorizationStatus type =  ABAddressBookGetAuthorizationStatus();
     //授权申请
@@ -96,6 +106,109 @@
         //释放book
         CFRelease(book);
     }
+    */
+    
+    
+    //判断是否已经授权
+    CNAuthorizationStatus status = [CNContactStore authorizationStatusForEntityType:CNEntityTypeContacts];
+    if ( status == CNAuthorizationStatusAuthorized)
+    {
+        //如果已经授权，直接返回
+        return;
+    }
+    else
+    {
+        //iOS9授权
+        if(IS_iOS9)
+        {
+            CNContactStore *store = [[CNContactStore alloc] init];
+            [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                if (error) {
+                    NSLog(@"error=%@",error);
+                }
+                if (granted) {
+                    NSLog(@"授权成功");
+                }else{
+                    NSLog(@"授权失败");
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"授权失败" message:@"请在设置中打开访问权限" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                    [alert show];
+                }
+                
+            }];
+        }
+        //iOS8授权方式
+        else if(IS_iOS8)
+        {
+             //创建通讯录
+             ABAddressBookRef book = ABAddressBookCreateWithOptions(NULL, NULL);
+             //请求授权
+             ABAddressBookRequestAccessWithCompletion(book, ^(bool granted, CFErrorRef error) {
+                 if (granted) {
+                     NSLog(@"授权成功");
+                 }else{
+                     NSLog(@"授权失败");
+                     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"授权失败" message:@"请在设置中打开访问权限" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                     [alert show];
+                 }
+             });
+        }
+        else if(IS_iOS6)
+        {
+            ABAddressBookRef book = ABAddressBookCreateWithOptions(NULL, NULL);
+            ABAddressBookRequestAccessWithCompletion(book, ^(bool granted, CFErrorRef error) {
+                if (granted) {
+                    NSLog(@"授权允许");
+                }else{
+                    NSLog(@"授权拒绝");
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"授权失败" message:@"请在设置中打开访问权限" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                    [alert show];
+                }
+            });
+            //释放book
+            CFRelease(book);
+        }
+        // [CNContactStore requestAccessForEntityType:completionHandler:]
+        
+    }
+    
+    
+    
+    /*
+    CFErrorRef *error = nil;
+    
+    ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(nil, error);
+    ABAddressBookRequestAccessWithCompletion(addressBook, ^(bool granted, CFErrorRef error) {
+        NSLog(@"granted==%d",granted);
+        
+        if (granted) {
+            NSLog(@"授权成功！");
+            //[self getUpAddBookViewPersonDataWithAddBook:addressBook];
+        } else {
+            NSLog(@"授权失败!");
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"授权失败" message:@"请在设置中打开访问权限" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+            [alert show];
+        }
+        
+    });
+     */
+    
+    /*
+    //1 判断是否授权成功
+       if ([CNContactStore authorizationStatusForEntityType:CNEntityTypeContacts] == CNAuthorizationStatusAuthorized) return;//授权成功直接返回
+        //2 创建通讯录
+        CNContactStore *store = [[CNContactStore alloc] init];
+        //3授权
+        [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                if (granted) {
+                    NSLog(@"授权成功");
+                     }else{
+                             NSLog(@"授权失败");
+                         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"授权失败" message:@"请在设置中打开访问权限" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                         [alert show];
+
+                         }
+            }];
+     */
 }
 
 - (void)didReceiveMemoryWarning {
@@ -477,6 +590,7 @@
  */
 -(void)addContact:(NSString* )phone{
     
+    /*
     ABAddressBookRef iPhoneAddressBook = ABAddressBookCreate();
     ABRecordRef newPerson = ABPersonCreate();
     CFErrorRef error = NULL;
@@ -500,7 +614,38 @@
     ABAddressBookSave(iPhoneAddressBook, &error);
     CFRelease(newPerson);
     CFRelease(iPhoneAddressBook);
+     */
+    
 
+    CFErrorRef error = NULL;
+    //创建一个通讯录操作对象
+    ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, &error);
+    //创建一条新的联系人纪录
+    ABRecordRef newRecord = ABPersonCreate();
+    
+    //姓名默认为手机号
+    if (self.check1.selected == YES) {
+        ABRecordSetValue(newRecord, kABPersonFirstNameProperty, (__bridge CFTypeRef)phone, &error);
+    }
+    //姓名根据文件中的数据随机生成
+    if (self.check2.selected == YES) {
+        int r = arc4random() % [self.arrayContact count];
+        //为新联系人记录添加属性值
+        ABRecordSetValue(newRecord, kABPersonFirstNameProperty, (__bridge CFTypeRef)[self.arrayContact objectAtIndex:r], &error);
+    }
+    //创建一个多值属性(电话)
+    ABMutableMultiValueRef multi = ABMultiValueCreateMutable(kABMultiStringPropertyType);
+    ABMultiValueAddValueAndLabel(multi, (__bridge CFTypeRef)phone, kABPersonPhoneMobileLabel, NULL);
+    ABRecordSetValue(newRecord, kABPersonPhoneProperty, multi, &error);
+    
+    //添加记录到通讯录操作对象
+    ABAddressBookAddRecord(addressBook, newRecord, &error);
+    //保存通讯录操作对象
+    ABAddressBookSave(addressBook, &error);
+    
+    CFRelease(multi);
+    CFRelease(newRecord);
+    CFRelease(addressBook);
     NSLog(@"添加成功！---%@",phone);
 }
 
