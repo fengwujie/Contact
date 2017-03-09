@@ -87,7 +87,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-    self.labVersion.text = [NSString stringWithFormat:@"版本号(%@)",[infoDictionary objectForKey:@"CFBundleShortVersionString"]];
+    //self.labVersion.text = [NSString stringWithFormat:@"版本号(%@)",[infoDictionary objectForKey:@"CFBundleShortVersionString"]];
+    self.labVersion.text = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
     [self readNSUserDefaults];
     
     /*
