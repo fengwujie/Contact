@@ -89,6 +89,8 @@
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     //self.labVersion.text = [NSString stringWithFormat:@"版本号(%@)",[infoDictionary objectForKey:@"CFBundleShortVersionString"]];
     self.labVersion.text = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+    //NSString *path = NSHomeDirectory();
+    //NSLog(@"path : %@", path);
     [self readNSUserDefaults];
     
     /*
@@ -357,7 +359,7 @@
     {
         _arrayPhone =nil;
         self.iHistoryCount = [userDefaultes integerForKey:[NSString stringWithFormat:@"iHistoryCount%@",self.phoneTxtName.text]];
-        NSLog(@"readNSUserDefaults -- %ld",(long)self.iHistoryCount);
+        //NSLog(@"readNSUserDefaults -- %ld",(long)self.iHistoryCount);
         self.historyCount.text =self.iHistoryCount == 0 ? 0 : [NSString stringWithFormat:@"%ld",(long)self.iHistoryCount];
     }
     if(self.defaultTxtName.text !=[userDefaultes valueForKey:@"lastDefaultTxtName"])
@@ -417,7 +419,7 @@
         NSInteger iBeginIndex =0;
         NSInteger iEndIndex=0;
         NSInteger iArrayPhoneTemp =self.arrayPhone.count;
-        NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",(long)iArrayPhoneTemp]);
+        //NSLog([NSString stringWithFormat:@"arrayphone的数量%ld",(long)iArrayPhoneTemp]);
         //如果历史数量<上限数量
         if(_iHistoryCount<iMaxCount)
         {
@@ -466,7 +468,7 @@
                 iEndIndex = iArrayPhoneTemp;
             }
         }
-        NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",(long)iBeginIndex,(long)iEndIndex]);
+        //NSLog([NSString stringWithFormat:@"ibeginIndex=%ld,iEndIndex=%ld",(long)iBeginIndex,(long)iEndIndex]);
         for (NSInteger index=iBeginIndex; index < iEndIndex; index ++) {
             NSString *phone = [self.arrayPhone objectAtIndex:index];
             [self addContact:phone];
